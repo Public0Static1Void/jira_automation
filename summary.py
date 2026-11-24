@@ -50,25 +50,33 @@ def main():
     ids = fields_ids(CUSTOM_FIELDS)
     fields = [ "summary", "status", "priority", "assignee", "created" ] + list(ids.values())
 
-    fileName = f"summary_{date.today():%Y-%m-%d}.csv"
-    with open(fileName, "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.writer(f, delimiter=";")
-        w.writerow(["Key", "Summary", "State", "Priority", "Assigned to", "Created at"] + CUSTOM_FIELDS)
+    error_file = "summary_error.txt"
+    error_text = ""
 
-        n = 0
-        for issue in search(JQL_QUERY, fields):
-            fl = issue["fields"]
-            w.writerow([
-                issue["key"],
-                fl["summary"],
-                value(fl["status"]),
-                value(fl.get("priority")),
-                value(fl.get("assignee")),
-                fl["created"][:10],
-            ] + [value(fl.get(ids[c])) for c in CUSTOM_FIELDS] )
-            n += 1
+    try:
+        fileName = f"summary_{date.today():%Y-%m-%d}.csv"
+        with open(fileName, "w", newline="", encoding="utf-8-sig") as f:
+            w = csv.writer(f, delimiter=";")
+            w.writerow(["Key", "Summary", "State", "Priority", "Assigned to", "Created at"] + CUSTOM_FIELDS)
 
-        print(f"[INFO] {n} activities exported to {fileName}")
+            n = 0
+            for issue in search(JQL_QUERY, fields):
+                fl = issue["fields"]
+                w.writerow([
+                    issue["key"],
+                    fl["summary"],
+                    value(fl["status"]),
+                    value(fl.get("priority")),
+                    value(fl.get("assignee")),
+                    fl["created"][:10],
+                ] + [value(fl.get(ids[c])) for c in CUSTOM_FIELDS] )
+                n += 1
+
+            print(f"[INFO] {n} activities exported to {fileName}")
+    except Exception as e:
+        with open(error_file, "w", encoding="utf-8") as f:
+            f.write(str(e))
+
 
 if __name__ == "__main__":
     main()
