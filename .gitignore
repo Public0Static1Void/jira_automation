@@ -4,4 +4,6 @@ venv/
 __pycache__/
 
 # Generated .csv files
-.csv
+*.csv
+# Generated .json files
+*.json
